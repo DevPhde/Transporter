@@ -16,23 +16,18 @@ export class OrderService {
 
   async create(createOrderDto: CreateOrderDto, userJwt: string) {
     try {
-      // pega o email no header
-      // const clientEmail = this.jwtProvider.jwtVerifyAndDecode(userJwt)
-      // const client = await communication("/authentication/getClientByEmail", {clientEmail: userJwt}) -  conectar ao Authentication e pegar {id, name, email} do cliente e motorista 
-
+      const clientEmail = this.jwtProvider.jwtVerifyAndDecode(userJwt)
+      const client = await communication("/authentication/getClientByEmail", {clientEmail: clientEmail})
       const destinyAddress = await getAddressByCep(createOrderDto.destiny);
       const sendedAddress = await getAddressByCep(createOrderDto.sended);
       const order = new Order(
         destinyAddress,
         sendedAddress,
         createOrderDto.price,
-        {
-          id: 1,
-          name: "joao",
-          email: "joao@email.com"
-        }, // preisa mudar para o client que chega do service authorization
+        client,
       );
-      return await this.orderRepository.create(order);
+      const create = await this.orderRepository.create(order);
+      
     } catch (error) {
       throw error;
     }
